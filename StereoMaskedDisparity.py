@@ -52,8 +52,6 @@ def calculate_disparity_map(rectified_img1, rectified_img2):
     blurred_img1 = cv.GaussianBlur(rectified_img1, gaussianSize, 0)
     blurred_img2 = cv.GaussianBlur(rectified_img2, gaussianSize, 0)
     
-    #leftG = cv.cvtColor(blurred_img1, cv.COLOR_BGR2GRAY)
-    #rightG = cv.cvtColor(blurred_img2, cv.COLOR_BGR2GRAY)
     
     leftG = cv.cvtColor(rectified_img1, cv.COLOR_BGR2GRAY)
     rightG = cv.cvtColor(rectified_img2, cv.COLOR_BGR2GRAY)
@@ -68,7 +66,6 @@ def calculate_disparity_map(rectified_img1, rectified_img2):
                                   speckleWindowSize=16, speckleRange=132)
 
     disparity_map = stereo01.compute(leftG, rightG)
-    #disparity_map = stereo.compute(blurred_img1, blurred_img2)
    
     disparity_map[disparity_map < 0] = 0 
     print('Disparity map calculation') # Remove negative disparity values  
@@ -204,12 +201,15 @@ def calculate_depth_map(disparity_map, baseline, focal_length):
  
  
 #Location of the files
-frames_folder = "/home/shishir/Desktop/Project/Scripts/IMGs/StereoTest/CalImgg/synched/"
-before_frames_folder = "/home/shishir/Desktop/Project/Scripts/IMGs/StereoTest/CalImgg/"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Get script directory
 
-#image from the two cameras
-imgL = cv.imread(os.path.join(before_frames_folder, "img_left1.jpg"))
-imgR= cv.imread(os.path.join(before_frames_folder, "img_right1.jpg"))
+frames_folder = os.path.join(BASE_DIR, "IMGs/StereoTest/CalImgg/synched/")
+before_frames_folder = os.path.join(BASE_DIR, "IMGs/StereoTest/CalImgg/")
+
+# Image paths
+imgL_path = os.path.join(before_frames_folder, "img_left1.jpg")
+imgR_path = os.path.join(before_frames_folder, "img_right1.jpg")
+
 
 rectified_img1, rectified_img2, img1, img2, Q = rectify_images(imgL, imgR, R, T, mtx1, dist1, mtx2, dist2)
 disparity_map = calculate_disparity_map(rectified_img1, rectified_img2)
@@ -224,8 +224,7 @@ line_only_map = subtract_line_from_disparity(binary_disparity_map, inverted_line
 masked_disparity_map = create_masked_disparity_map(disparity_map, line_only_map)
 overlayed_image = overlay_disparity_on_image(imgR, masked_disparity_map)
 depth_map, normalized_depth_map = calculate_depth_map(disparity_map, 0.39, 1500)
-#plot_stereo_results(line_only_map, binary_disparity_map, rectified_img1, rectified_img2, 
-                        # inverted_line_image, masked_disparity_map, disparity_map)
+
 
 height, width = imgR.shape[:2]
 output_size = (width, height)
